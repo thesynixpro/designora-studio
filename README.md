@@ -9,6 +9,7 @@ Designora Studio is an Android-native, AI-assisted design workspace built with K
 - Room for local project persistence
 - AndroidX Security Crypto for encrypted provider credentials
 - OkHttp for Gemini and OpenRouter APIs
+- Bundled Lucide-style SVG icon pack rendered with AndroidSVG (no emoji-based UI icons)
 - Coroutines for network and database work
 
 ## Build
@@ -27,10 +28,11 @@ The APK is generated at `app/build/outputs/apk/debug/app-debug.apk`.
 2. Configure a Gemini or OpenRouter API key in AI Providers. Credentials are stored with AndroidX encrypted preferences and are not included in project JSON.
 3. Fetch the provider's actual model list from its API, select a model, and test the connection.
 4. Generate a structured JSON design document through the selected provider.
-5. Reopen saved projects from the Room database.
-6. Edit element text and font size, add text elements, duplicate or delete selected elements, and save changes.
-7. Start from clearly labelled built-in templates.
-8. Export the first page as an HTML document using Android's document picker.
+5. Generated design prompts explicitly prohibit emoji and request named SVG icons from the bundled icon pack; accidental emoji in AI copy is sanitized before saving.
+6. Reopen saved projects from the Room database.
+7. Edit element text and font size, add text elements, duplicate or delete selected elements, and save changes.
+8. Start from clearly labelled built-in templates.
+9. Export the first page as an HTML document using Android's document picker.
 
 ## Important scope notes
 
@@ -47,3 +49,8 @@ Never share your API keys or commit them to the repository. Keys are stored loca
 ## GitHub Actions
 
 `.github/workflows/android.yml` builds the debug APK, uploads it as an Actions artifact, and publishes it as a GitHub Release for pushes to `main` or `master`. Pull requests build the APK but do not publish a release.
+
+
+## Visual direction and icon policy
+
+The interface uses a restrained warm-neutral product aesthetic, compact corner radii, consistent spacing, charcoal typography, and a single controlled accent. The app UI uses vector icons, and generated design instructions prohibit emoji or Unicode pictograms. A bundled Lucide-style SVG set lives in `app/src/main/assets/icons/`; generated `iconName` values are restricted to this allowlist and rendered with AndroidSVG. AI-provided text is sanitized to remove accidental emoji before the design is persisted.

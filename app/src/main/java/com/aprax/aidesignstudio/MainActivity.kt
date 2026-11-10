@@ -93,7 +93,9 @@ private fun ScreenFrame(title: String, subtitle: String? = null, onBack: (() -> 
                 Text(title, fontSize = 23.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
                 if (subtitle != null) Text(subtitle, fontSize = 12.sp, color = Muted)
             }
-            Text("D", Modifier.size(34.dp).clip(CircleShape).background(Accent).wrapContentSize(Alignment.Center), color = Color.White, fontWeight = FontWeight.Bold)
+            Box(Modifier.size(34.dp).clip(RoundedCornerShape(10.dp)).background(Color(0xFFE9E6FA)), contentAlignment = Alignment.Center) {
+                SvgIcon("layers", iconSize = 19.dp)
+            }
         }
         content()
     }
@@ -120,12 +122,12 @@ private fun HomeScreen(projects: List<ProjectEntity>, onCreate: () -> Unit, onPr
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                        QuickTile("Mobile app", Icons.Outlined.PhoneAndroid, Modifier.weight(1f), onCreate)
-                        QuickTile("Website", Icons.Outlined.Language, Modifier.weight(1f), onCreate)
+                        QuickTile("Mobile app", "smartphone", Modifier.weight(1f), onCreate)
+                        QuickTile("Website", "globe", Modifier.weight(1f), onCreate)
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                        QuickTile("Landing page", Icons.Outlined.Web, Modifier.weight(1f), onCreate)
-                        QuickTile("Dashboard", Icons.Outlined.Dashboard, Modifier.weight(1f), onCreate)
+                        QuickTile("Landing page", "layout-dashboard", Modifier.weight(1f), onCreate)
+                        QuickTile("Dashboard", "layers", Modifier.weight(1f), onCreate)
                     }
                 }
             }
@@ -147,9 +149,9 @@ private fun HomeScreen(projects: List<ProjectEntity>, onCreate: () -> Unit, onPr
 @Composable private fun SectionTitle(title: String, subtitle: String) { Column { Text(title, fontSize = 18.sp, fontWeight = FontWeight.Bold); Text(subtitle, fontSize = 12.sp, color = Muted) } }
 
 @Composable
-private fun QuickTile(title: String, icon: androidx.compose.ui.graphics.vector.ImageVector, modifier: Modifier, onClick: () -> Unit) {
-    Surface(modifier.clickable(onClick = onClick), shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.surface, border = androidx.compose.foundation.BorderStroke(1.dp, Line)) {
-        Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) { Icon(icon, null, tint = Accent); Spacer(Modifier.width(9.dp)); Text(title, fontSize = 13.sp, fontWeight = FontWeight.SemiBold) }
+private fun QuickTile(title: String, iconName: String, modifier: Modifier, onClick: () -> Unit) {
+    Surface(modifier.clickable(onClick = onClick), shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surface, border = androidx.compose.foundation.BorderStroke(1.dp, Line)) {
+        Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) { SvgIcon(iconName, iconSize = 19.dp); Spacer(Modifier.width(9.dp)); Text(title, fontSize = 13.sp, fontWeight = FontWeight.SemiBold) }
     }
 }
 
@@ -217,7 +219,7 @@ private fun CreateScreen(settings: ProviderSettings, onBack: () -> Unit, onCreat
                     finally { loading = false }
                 }
             }, enabled = !loading, modifier = Modifier.fillMaxWidth().height(52.dp), shape = RoundedCornerShape(12.dp)) {
-                if (loading) { CircularProgressIndicator(Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp); Spacer(Modifier.width(9.dp)); Text("Creating design…") } else { Icon(Icons.Outlined.AutoAwesome, null); Spacer(Modifier.width(8.dp)); Text("Generate editable design") }
+                if (loading) { CircularProgressIndicator(Modifier.size(18.dp), color = Color.White, strokeWidth = 2.dp); Spacer(Modifier.width(9.dp)); Text("Creating design…") } else { SvgIcon("wand-sparkles", iconSize = 19.dp); Spacer(Modifier.width(8.dp)); Text("Generate editable design") }
             }
             Spacer(Modifier.height(12.dp))
         }
@@ -392,7 +394,14 @@ private fun EditorScreen(id: String, db: DesignoraDatabase, onBack: () -> Unit) 
                         val fg = parseColor(element.optString("color", "#222622"), Ink)
                         Surface(Modifier.fillMaxWidth().then(if (index == selected) Modifier.border(2.dp, Accent, RoundedCornerShape(8.dp)) else Modifier).clickable { selected = index }, color = bg, shape = RoundedCornerShape(8.dp), shadowElevation = 1.dp) {
                             Box(Modifier.padding(14.dp).heightIn(min = 34.dp), contentAlignment = Alignment.CenterStart) {
-                                Text(element.optString("text"), color = fg, fontSize = element.optInt("fontSize", 15).coerceIn(10, 34).sp, fontWeight = if (element.optString("type") == "heading") FontWeight.Bold else FontWeight.Normal)
+                                val iconName = element.optString("iconName")
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    if (iconName.isNotBlank()) {
+                                        SvgIcon(iconName, iconSize = 18.dp)
+                                        Spacer(Modifier.width(8.dp))
+                                    }
+                                    Text(element.optString("text"), color = fg, fontSize = element.optInt("fontSize", 15).coerceIn(10, 34).sp, fontWeight = if (element.optString("type") == "heading") FontWeight.Bold else FontWeight.Normal)
+                                }
                             }
                         }
                     }
