@@ -54,3 +54,17 @@ Never share your API keys or commit them to the repository. Keys are stored loca
 ## Visual direction and icon policy
 
 The interface uses a restrained warm-neutral product aesthetic, compact corner radii, consistent spacing, charcoal typography, and a single controlled accent. The app UI uses vector icons, and generated design instructions prohibit emoji or Unicode pictograms. A bundled Lucide-style SVG set lives in `app/src/main/assets/icons/`; generated `iconName` values are restricted to this allowlist and rendered with AndroidSVG. AI-provided text is sanitized to remove accidental emoji before the design is persisted.
+
+## Launcher icon
+
+The Android launcher icon is implemented as a custom Designora `D` monogram. It includes:
+- Adaptive launcher icons for Android 8.0+ (`mipmap-anydpi-v26`), including a monochrome layer for supported themed icons.
+- Density-specific PNG fallbacks for older Android versions.
+- A transparent vector foreground and a separate deep-charcoal background.
+- Manifest wiring through `android:icon` and `android:roundIcon`.
+
+The editable vector source is `app/src/main/res/drawable/ic_launcher_foreground.xml`; the original SVG artwork is `app/src/main/assets/designora-app-icon.svg`.
+
+## Custom AI instructions
+
+Open **Settings → My AI instructions → Add instructions** to write your own design rules. Save them once; they are stored locally on the device and automatically appended to future design-generation requests sent through either Gemini or OpenRouter. You can edit or clear the instructions at any time. The app keeps its required JSON response schema and built-in safety/output constraints.

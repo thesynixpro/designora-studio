@@ -3,6 +3,8 @@
     <application
         android:allowBackup="false"
         android:label="Designora Studio"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:theme="@style/Theme.Designora"
         android:usesCleartextTraffic="false">
         <activity android:name="com.aprax.aidesignstudio.MainActivity" android:exported="true">

@@ -14,6 +14,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -308,9 +310,11 @@ private fun SettingsScreen(settings: ProviderSettings, onBack: () -> Unit) {
     var models by remember { mutableStateOf(emptyList<String>()) }
     var status by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
+    var instructionText by remember { mutableStateOf(settings.customInstructions) }
+    var showInstructionEditor by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    ScreenFrame("AI providers", "API credentials are encrypted on this device", onBack) {
-        Column(Modifier.fillMaxSize().padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    ScreenFrame("AI settings", "Providers and your own generation rules", onBack) {
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             var expanded by remember { mutableStateOf(false) }
             Box {
                 OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) { Text("Provider: $provider", Modifier.weight(1f)); Icon(Icons.Outlined.ExpandMore, null) }
@@ -337,14 +341,58 @@ private fun SettingsScreen(settings: ProviderSettings, onBack: () -> Unit) {
             if (status.isNotBlank()) Text(status, color = if (status.startsWith("Connected")) Color(0xFF26734D) else MaterialTheme.colorScheme.error, fontSize = 12.sp)
             if (models.isNotEmpty()) {
                 Text("AVAILABLE MODELS", fontWeight = FontWeight.Bold, fontSize = 11.sp, color = Muted)
-                LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    items(models.take(150)) { item -> ListItem(headlineContent = { Text(item, fontSize = 12.sp) }, trailingContent = { if (item == model) Icon(Icons.Outlined.Check, null, tint = Accent) }, modifier = Modifier.clickable { model = item; settings.model = item }) }
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    models.take(40).forEach { item -> ListItem(headlineContent = { Text(item, fontSize = 12.sp) }, trailingContent = { if (item == model) Icon(Icons.Outlined.Check, null, tint = Accent) }, modifier = Modifier.clickable { model = item; settings.model = item }) }
                 }
             } else {
                 Text("Gemini and OpenRouter model lists are fetched from their real APIs. No demo model list is used. Keep your API key private.", color = Muted, fontSize = 12.sp)
-                Spacer(Modifier.weight(1f))
             }
+            HorizontalDivider(color = Line)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("My AI instructions", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                    Text("Add your own rules for every new AI design", color = Muted, fontSize = 12.sp)
+                }
+                TextButton(onClick = { showInstructionEditor = true }) {
+                    Icon(Icons.Outlined.EditNote, null); Spacer(Modifier.width(5.dp)); Text("Edit")
+                }
+            }
+            Surface(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(14.dp), border = androidx.compose.foundation.BorderStroke(1.dp, Line)) {
+                Column(Modifier.fillMaxWidth().padding(14.dp)) {
+                    Text(if (instructionText.isBlank()) "No custom instructions added" else "Custom instructions are active", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                    Text(if (instructionText.isBlank()) "Tap Edit to write rules such as preferred layouts, colors, components, and design behavior." else instructionText, color = Muted, fontSize = 12.sp, maxLines = 5)
+                    Spacer(Modifier.height(8.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = { showInstructionEditor = true }, modifier = Modifier.weight(1f)) { Text(if (instructionText.isBlank()) "Add instructions" else "Manage instructions") }
+                        if (instructionText.isNotBlank()) OutlinedButton(onClick = { instructionText = ""; settings.customInstructions = "" }) { Icon(Icons.Outlined.DeleteOutline, "Remove instructions") }
+                    }
+                }
+            }
+            Text("Instructions are saved on this device and appended to AI design-generation prompts for both Gemini and OpenRouter. They do not override the app's required output format.", color = Muted, fontSize = 11.sp)
         }
+    }
+    if (showInstructionEditor) {
+        AlertDialog(
+            onDismissRequest = { showInstructionEditor = false },
+            title = { Text("Custom AI instructions") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Write the rules you want the AI to follow whenever it creates a design. You can change these at any time.", fontSize = 12.sp, color = Muted)
+                    OutlinedTextField(
+                        value = instructionText,
+                        onValueChange = { instructionText = it },
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 180.dp, max = 360.dp),
+                        placeholder = { Text("Example: Use a warm cream background, restrained green accents, realistic content, generous whitespace, and consistent spacing. Avoid generic AI layouts...") },
+                        minLines = 7,
+                        maxLines = 14
+                    )
+                }
+            },
+            confirmButton = {
+                Button(onClick = { settings.customInstructions = instructionText.trim(); instructionText = settings.customInstructions; showInstructionEditor = false }) { Text("Save instructions") }
+            },
+            dismissButton = { TextButton(onClick = { showInstructionEditor = false }) { Text("Cancel") } }
+        )
     }
 }
 
